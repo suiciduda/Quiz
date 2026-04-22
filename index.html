@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Chá Bar — Duda & Gabriel</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+    :root { --primary: #002266; --secondary: #001133; --accent: #ffff00; --correct: #28a745; --wrong: #dc3545; --text: #ffffff; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: radial-gradient(circle, var(--primary), var(--secondary)); color: var(--text); font-family: 'Roboto', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .game-container { width: 100%; max-width: 600px; text-align: center; }
+    .screen { display: none; animation: fadeIn 0.5s ease; }
+    .screen.active { display: block; }
+    .logo { font-size: 2.5rem; font-weight: 900; font-style: italic; color: var(--accent); text-shadow: 2px 2px #000; margin-bottom: 20px; }
+    .card { background: linear-gradient(to bottom, #0044cc, #002266); border: 3px solid #fff; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+    .question-text { font-size: 1.3rem; font-weight: bold; line-height: 1.4; }
+    .category-label { font-size: 0.8rem; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; display: block; }
+    .options-grid { display: grid; gap: 12px; }
+    .option-btn { background: linear-gradient(to bottom, #002266, #001133); border: 2px solid #fff; border-radius: 15px; padding: 15px; color: #fff; cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s; }
+    .option-btn span { color: var(--accent); font-weight: bold; margin-right: 10px; }
+    .option-btn.correct { background: var(--correct) !important; }
+    .option-btn.wrong { background: var(--wrong) !important; }
+    .progress { font-size: 0.9rem; margin-top: 15px; opacity: 0.8; }
+    .btn-start { background: var(--accent); color: #000; padding: 15px 40px; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="game-container">
+    <div id="start-screen" class="screen active">
+        <div class="logo">QUIZ DOS NOIVOS</div>
+        <p style="margin-bottom: 30px; letter-spacing: 2px;">DUDA & GABRIEL</p>
+        <button class="btn-start" onclick="startGame()">COMEÇAR JOGO</button>
+    </div>
+    <div id="game-screen" class="screen">
+        <div class="card"><span class="category-label" id="cat-text">Lore do Casal</span><p class="question-text" id="q-text">Carregando...</p></div>
+        <div class="options-grid" id="opt-box"></div>
+        <p class="progress" id="prog-text">1 / 32</p>
+    </div>
+    <div id="end-screen" class="screen">
+        <div class="logo">FIM DE JOGO!</div>
+        <p id="final-result" style="font-size: 1.2rem; margin-bottom: 20px;"></p>
+        <button class="btn-start" onclick="location.reload()">RECOMEÇAR</button>
+    </div>
+</div>
+<script>
+const questions = [
+    { q: "Quem chamou o outro de 'amor' primeiro, quando eram só amigos?", opts: ["Duda", "Gabriel"], ans: 1 },
+    { q: "Quem disse o primeiro 'Eu te amo'?", opts: ["Duda", "Gabriel"], ans: 1 },
+    { q: "Quem tem o pior senso de direção e se perde com o GPS ligado?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem é o mais 'manteiga derretida' e chora por tudo?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem é o primeiro a querer ir embora da festa para dormir?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem toma menos banho?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Se algo quebra em casa, quem bota a mão na massa para consertar?", opts: ["Duda ou o Pai dela", "Gabriel"], ans: 0 },
+    { q: "Quem perde a paciência primeiro?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Qual música descreve melhor o relacionamento do casal?", opts: ["Senhor do Tempo", "Evidências"], ans: 0 },
+    { q: "Quem é o mais carinhoso e 'grudento' no dia a dia?", opts: ["Duda", "Gabriel"], ans: 1 },
+    { q: "Quem é o cozinheiro oficial?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem gasta mais dinheiro com bobeiras?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem é o mais teimoso da relação?", opts: ["Duda", "Gabriel"], ans: 1 },
+    { q: "Quem demora mais para se arrumar?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem teve a iniciativa de sugerir que morassem juntos?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem é o mais provável de esquecer a chave de casa ou o celular?", opts: ["Duda", "Gabriel"], ans: 1 },
+    { q: "Quem manda no controle remoto e escolhe o que vão assistir?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem é o mais ciumento com os pets (Gnar, Aloy, Jinx e Akira)?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem é o mais provável de dormir nos primeiros 10 minutos de um filme?", opts: ["Duda", "Gabriel"], ans: 1 },
+    { q: "Quem é o mais provável de começar uma briga?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { q: "Quem pede desculpas primeiro?", opts: ["Duda", "Gabriel"], ans: 0 },
+    { cat: "Música 01 (Duda)", q: "Qual o nome desta música?", opts: ["Céu Azul", "Senhor do Tempo", "Pontes Indestrutíveis"], ans: 1 },
+    { cat: "Música 02 (Duda)", q: "Qual o nome desta música?", opts: ["Evidências", "Fio de Cabelo", "Boate Azul"], ans: 0 },
+    { cat: "Música 03 (Duda)", q: "De qual anime é esta abertura?", opts: ["Naruto (Blue Bird)", "One Piece", "Dragon Ball"], ans: 0 },
+    { cat: "Música 04 (Duda)", q: "Qual o nome da música?", opts: ["Fada", "Amigo Apaixonado", "Borboletas"], ans: 2 },
+    { cat: "Música 05 (Duda)", q: "Qual a banda desta música?", opts: ["Slipknot", "System of a Down (Spiders)", "Korn"], ans: 1 },
+    { cat: "Música 06 (Duda)", q: "Qual o nome da música?", opts: ["Zombie", "Linger", "Dreams"], ans: 0 },
+    { cat: "Música 07 (Gabriel)", q: "Qual o nome desta música do Imagine Dragons?", opts: ["On Top of the World", "Believer", "Demons"], ans: 0 },
+    { cat: "Música 08 (Gabriel)", q: "Qual o nome deste clássico do QOTSA?", opts: ["No One Knows", "Go With the Flow", "Little Sister"], ans: 0 },
+    { cat: "Música 09 (Gabriel)", q: "Qual o nome desta música do Oliver Tree?", opts: ["Life Goes On", "Cowboys Don't Cry", "Hurt"], ans: 1 },
+    { cat: "Música 10 (Gabriel)", q: "Qual o nome desta música do Djonga?", opts: ["Leal", "Tipo", "Junho de 94"], ans: 1 },
+    { cat: "Música 11 (Gabriel)", q: "Qual o nome desta música do Pixote?", opts: ["Mande um Sinal", "Insegurança", "Nem de Graça"], ans: 0 }
+];
+let current = 0, score = 0;
+function startGame() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('game-screen').classList.add('active'); showQ(); }
+function showQ() {
+    const q = questions[current]; document.getElementById('cat-text').innerText = q.cat || "Lore do Casal"; document.getElementById('q-text').innerText = q.q; document.getElementById('prog-text').innerText = `${current + 1} / ${questions.length}`;
+    const box = document.getElementById('opt-box'); box.innerHTML = '';
+    q.opts.forEach((o, i) => { const b = document.createElement('button'); b.className = 'option-btn'; b.innerHTML = `<span>${String.fromCharCode(65+i)}:</span> ${o}`; b.onclick = () => check(i, b); box.appendChild(b); });
+}
+function check(i, btn) {
+    const btns = document.querySelectorAll('.option-btn'); btns.forEach(b => b.disabled = true);
+    if(i === questions[current].ans) { btn.classList.add('correct'); score++; } else { btn.classList.add('wrong'); btns[questions[current].ans].classList.add('correct'); }
+    setTimeout(() => { current++; if(current < questions.length) showQ(); else finish(); }, 1200);
+}
+function finish() { document.getElementById('game-screen').classList.remove('active'); document.getElementById('end-screen').classList.add('active'); document.getElementById('final-result').innerText = `Você acertou ${score} de ${questions.length} perguntas!`; }
+</script>
+</body>
+</html>
